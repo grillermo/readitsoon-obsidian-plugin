@@ -1,0 +1,17 @@
+{
+  "name": "readitsoon-obsidian-plugin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "builtin-modules": "^5.0.0",
+    "esbuild": "^0.25.0",
+    "obsidian": "^1.8.7",
+    "typescript": "^5.8.0"
+  }
+}
