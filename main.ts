@@ -107,10 +107,25 @@ export default class ReadItSoonPlugin extends Plugin {
   }
 
   private async fetchArticles(): Promise<ReadItSoonArticle[]> {
-    const response = await requestUrl(this.requestParams("/api/obsidian/articles", "GET"));
-    if (response.status !== 200) throw new Error(`HTTP ${response.status}`);
+    const allArticles: ReadItSoonArticle[] = [];
+    let cursor: number | null = null;
 
-    return response.json as ReadItSoonArticle[];
+    while (true) {
+      const path = cursor
+        ? `/api/obsidian/articles?after=${cursor}`
+        : `/api/obsidian/articles`;
+
+      const response = await requestUrl(this.requestParams(path, "GET"));
+      if (response.status !== 200) throw new Error(`HTTP ${response.status}`);
+
+      const data = response.json as { articles: ReadItSoonArticle[]; cursor: number | null };
+      allArticles.push(...data.articles);
+
+      if (!data.cursor) break;
+      cursor = data.cursor;
+    }
+
+    return allArticles;
   }
 
   private async markDownloaded(articleId: number): Promise<void> {
