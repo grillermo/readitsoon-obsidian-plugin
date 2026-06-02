@@ -69,11 +69,6 @@ export default class ReadItSoonPlugin extends Plugin {
     this.startPolling();
   }
 
-  async testConnection(): Promise<void> {
-    await this.fetchArticles();
-    new Notice("ReadItSoon connection OK");
-  }
-
   async syncArticles(): Promise<void> {
     if (!this.settings.token.trim()) {
       new Notice("ReadItSoon token is missing");
@@ -264,9 +259,9 @@ class ReadItSoonSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Test connection")
       .addButton((button) => button
-        .setButtonText("Test connection")
+        .setButtonText("Sync now")
         .onClick(async () => {
-          await this.plugin.testConnection();
+          await this.plugin.syncArticles();
         }));
   }
 }
