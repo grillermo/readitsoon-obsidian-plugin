@@ -265,13 +265,16 @@ class ReadItSoonSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Token")
       .setDesc("Paste token from the ReadItSoon Obsidian setup page.")
-      .addText((text) => text
-        .setPlaceholder("20 character token")
-        .setValue(this.plugin.settings.token)
-        .onChange(async (value) => {
-          this.plugin.settings.token = value.trim();
-          await this.plugin.saveSettings();
-        }));
+      .addText((text) => {
+        text
+          .setPlaceholder("20 character token")
+          .setValue(this.plugin.settings.token)
+          .onChange(async (value) => {
+            this.plugin.settings.token = value.trim();
+            await this.plugin.saveSettings();
+          });
+        text.inputEl.type = "password";
+      });
 
     new Setting(containerEl)
       .setName("Folder")
