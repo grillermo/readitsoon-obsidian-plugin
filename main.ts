@@ -30,7 +30,7 @@ const DEFAULT_SETTINGS: ReadItSoonSettings = {
   token: "",
   folder: "ReadItSoon",
   pollIntervalMinutes: 1,
-  serverUrl: "https://readitsoon.chiq.me",
+  serverUrl: "https://readitsoon.app",
 };
 
 function validateServerUrl(url: string): { valid: boolean; error?: string } {
