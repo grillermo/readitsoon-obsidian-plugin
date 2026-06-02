@@ -33,6 +33,42 @@ const DEFAULT_SETTINGS: ReadItSoonSettings = {
   serverUrl: "https://readitsoon.chiq.me",
 };
 
+function validateServerUrl(url: string): { valid: boolean; error?: string } {
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return { valid: true }; // Allow empty to use default
+  }
+
+  try {
+    const parsed = new URL(trimmed);
+
+    // Allow HTTPS (production)
+    if (parsed.protocol === "https:") {
+      return { valid: true };
+    }
+
+    // Allow HTTP for localhost development only
+    if (
+      parsed.protocol === "http:" &&
+      (parsed.hostname === "localhost" ||
+        parsed.hostname === "127.0.0.1" ||
+        parsed.hostname === "[::1]")
+    ) {
+      return { valid: true };
+    }
+
+    return {
+      valid: false,
+      error: "Server URL must use HTTPS (or HTTP for localhost development only)",
+    };
+  } catch (e) {
+    return {
+      valid: false,
+      error: "Invalid server URL format",
+    };
+  }
+}
+
 export default class ReadItSoonPlugin extends Plugin {
   settings: ReadItSoonSettings;
   private pollTimer: number | null = null;
@@ -262,14 +298,26 @@ class ReadItSoonSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Server URL")
-      .setDesc("Use production URL or a local development server.")
-      .addText((text) => text
-        .setPlaceholder(DEFAULT_SETTINGS.serverUrl)
-        .setValue(this.plugin.settings.serverUrl)
-        .onChange(async (value) => {
-          this.plugin.settings.serverUrl = value.trim() || DEFAULT_SETTINGS.serverUrl;
-          await this.plugin.saveSettings();
-        }));
+      .setDesc("Use production URL or a local development server. Must use HTTPS or HTTP localhost.")
+      .addText((text) => {
+        const textComponent = text
+          .setPlaceholder(DEFAULT_SETTINGS.serverUrl)
+          .setValue(this.plugin.settings.serverUrl)
+          .onChange(async (value) => {
+            const validation = validateServerUrl(value);
+
+            if (!validation.valid) {
+              new Notice(`Invalid server URL: ${validation.error}`);
+              return;
+            }
+
+            this.plugin.settings.serverUrl =
+              value.trim() || DEFAULT_SETTINGS.serverUrl;
+            await this.plugin.saveSettings();
+          });
+
+        return textComponent;
+      });
 
     new Setting(containerEl)
       .setName("Test connection")
