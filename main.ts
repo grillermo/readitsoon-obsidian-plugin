@@ -191,7 +191,22 @@ export default class ReadItSoonPlugin extends Plugin {
       .replace(/\s+/g, " ")
       .trim();
 
-    return sanitized || "Untitled article";
+    return this.truncateFileName(sanitized || "Untitled article");
+  }
+
+  // Filesystems cap each path component at 255 bytes. Leave headroom for the
+  // ".md" extension and a " 99" dedupe suffix added by availablePath.
+  private truncateFileName(name: string): string {
+    const maxBytes = 200;
+    const encoder = new TextEncoder();
+    if (encoder.encode(name).length <= maxBytes) return name;
+
+    let truncated = name;
+    while (encoder.encode(truncated).length > maxBytes && truncated.length > 0) {
+      truncated = truncated.slice(0, -1);
+    }
+
+    return truncated.trim() || "Untitled article";
   }
 
   private errorMessage(error: unknown): string {
