@@ -110,7 +110,13 @@ export default class ReadItSoonPlugin extends Plugin {
     const response = await requestUrl(this.requestParams("/api/obsidian/articles", "GET"));
     if (response.status !== 200) throw new Error(`HTTP ${response.status}`);
 
-    return response.json as ReadItSoonArticle[];
+    const body = response.json;
+    const articles = Array.isArray(body) ? body : body?.articles ?? body?.data;
+    if (!Array.isArray(articles)) {
+      throw new Error(`unexpected response shape: ${JSON.stringify(body).slice(0, 200)}`);
+    }
+
+    return articles as ReadItSoonArticle[];
   }
 
   private async markDownloaded(articleId: number): Promise<void> {
